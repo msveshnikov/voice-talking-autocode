@@ -44,7 +44,7 @@ const App = () => {
     const handleListen = useCallback(
         (transcript) => {
             setText(transcript);
-            if (autoRecording) {
+            if (autoRecording && transcript.trim() !== "") {
                 handleSubmit();
             }
         },
@@ -73,6 +73,10 @@ const App = () => {
             setConversation(finalConversation);
             TextToSpeech.speak(aiReply, language);
             saveConversationToLocalStorage(finalConversation);
+        }
+
+        if (autoRecording) {
+            setIsListening(true);
         }
     };
 
@@ -125,97 +129,99 @@ const App = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container maxWidth="md">
-                <Box sx={{ my: 4 }}>
-                    <Grid container justifyContent="space-between" alignItems="center">
-                        <Grid item>
-                            <Typography variant="h4" component="h1" gutterBottom>
-                                Voice Talking App with AI
-                            </Typography>
+            <Box sx={{ bgcolor: "background.default", minHeight: "100vh", color: "text.primary" }}>
+                <Container maxWidth="md">
+                    <Box sx={{ my: 4 }}>
+                        <Grid container justifyContent="space-between" alignItems="center">
+                            <Grid item>
+                                <Typography variant="h4" component="h1" gutterBottom>
+                                    Voice Talking App with AI
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <IconButton onClick={toggleTheme} color="inherit">
+                                    {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+                                </IconButton>
+                                <IconButton onClick={toggleDrawer(true)} color="inherit">
+                                    <HistoryIcon />
+                                </IconButton>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <IconButton onClick={toggleTheme} color="inherit">
-                                {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-                            </IconButton>
-                            <IconButton onClick={toggleDrawer(true)} color="inherit">
-                                <HistoryIcon />
-                            </IconButton>
+                        <Grid container spacing={2} sx={{ mb: 2 }}>
+                            <Grid item xs={12} sm={6}>
+                                <LanguageSelector language={language} onChange={handleLanguageChange} />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Button
+                                    variant="contained"
+                                    color={isListening ? "secondary" : "primary"}
+                                    onClick={toggleListening}
+                                    startIcon={<MicIcon />}
+                                    fullWidth
+                                >
+                                    {isListening ? "Stop" : "Start"} Listening
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid item xs={12} sm={6}>
-                            <LanguageSelector language={language} onChange={handleLanguageChange} />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <Button
-                                variant="contained"
-                                color={isListening ? "secondary" : "primary"}
-                                onClick={toggleListening}
-                                startIcon={<MicIcon />}
-                                fullWidth
-                            >
-                                {isListening ? "Stop" : "Start"} Listening
-                            </Button>
-                        </Grid>
-                    </Grid>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                        <Typography>Auto Recording:</Typography>
-                        <Switch
-                            checked={autoRecording}
-                            onChange={() => setAutoRecording((prev) => !prev)}
-                            inputProps={{ "aria-label": "controlled" }}
+                        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                            <Typography>Auto Recording:</Typography>
+                            <Switch
+                                checked={autoRecording}
+                                onChange={() => setAutoRecording((prev) => !prev)}
+                                inputProps={{ "aria-label": "controlled" }}
+                            />
+                        </Box>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            sx={{ mb: 2 }}
                         />
+                        <Button variant="contained" onClick={handleSubmit} sx={{ mb: 2 }} disabled={isLoading}>
+                            {isLoading ? "Processing..." : "Submit"}
+                        </Button>
+                        {error && (
+                            <Typography color="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Typography>
+                        )}
+                        <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+                            <Typography variant="h6" gutterBottom>
+                                AI Response:
+                            </Typography>
+                            <Typography>{aiResponse}</Typography>
+                        </Paper>
+                        <ConversationLog conversation={conversation} />
                     </Box>
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        sx={{ mb: 2 }}
-                    />
-                    <Button variant="contained" onClick={handleSubmit} sx={{ mb: 2 }} disabled={isLoading}>
-                        {isLoading ? "Processing..." : "Submit"}
-                    </Button>
-                    {error && (
-                        <Typography color="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Typography>
-                    )}
-                    <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-                        <Typography variant="h6" gutterBottom>
-                            AI Response:
-                        </Typography>
-                        <Typography>{aiResponse}</Typography>
-                    </Paper>
-                    <ConversationLog conversation={conversation} />
-                </Box>
-            </Container>
-            <SpeechRecognition
-                isListening={isListening}
-                language={language}
-                onTranscript={handleListen}
-                onError={(error) => console.error(error)}
-            />
-            <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-                <Box
-                    sx={{ width: 250 }}
-                    role="presentation"
-                    onClick={toggleDrawer(false)}
-                    onKeyDown={toggleDrawer(false)}
-                >
-                    <List>
-                        <ListItem>
-                            <ListItemText primary="Conversation Sessions" />
-                        </ListItem>
-                        {sessions.map((session) => (
-                            <ListItem key={session.id} button onClick={() => selectSession(session.id)}>
-                                <ListItemText primary={`Session ${session.id}`} />
+                </Container>
+                <SpeechRecognition
+                    isListening={isListening}
+                    language={language}
+                    onTranscript={handleListen}
+                    onError={(error) => console.error(error)}
+                />
+                <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+                    <Box
+                        sx={{ width: 250 }}
+                        role="presentation"
+                        onClick={toggleDrawer(false)}
+                        onKeyDown={toggleDrawer(false)}
+                    >
+                        <List>
+                            <ListItem>
+                                <ListItemText primary="Conversation Sessions" />
                             </ListItem>
-                        ))}
-                    </List>
-                </Box>
-            </Drawer>
+                            {sessions.map((session) => (
+                                <ListItem key={session.id} button onClick={() => selectSession(session.id)}>
+                                    <ListItemText primary={`Session ${session.id}`} />
+                                </ListItem>
+                            ))}
+                        </List>
+                    </Box>
+                </Drawer>
+            </Box>
         </ThemeProvider>
     );
 };

@@ -78,4 +78,6 @@ This project is licensed under the MIT License.
 -   save conversation logs to localstorage (each session in separate in drawer)
 -   add automatic pause detection and provide AI answer immediately, then switch to listening
 -   when stop listening, auot submit and send tp model
--   make dark theme apply to all application noot only chat log
+-   make dark theme apply to full screen of app (I see some white parts around still)
+-   send chat history (this session only) to model so it has context of our conversation
+-   add time of session to drawer, not just id
