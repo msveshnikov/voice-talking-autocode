@@ -47,15 +47,35 @@ const App = () => {
         sendMessage,
         conversationHistory,
         clearConversationHistory,
+        sessions,
         loadSession,
+        deleteSession,
     } = useAIIntegration();
 
-    const { createNewSession, updateSession, getAllSessions, setActiveSession, currentSession } =
+    const { createNewSession, updateSession, getSession, getAllSessions, setActiveSession, currentSession } =
         useSessionManager();
 
     const { speak, stop } = useTextToSpeech();
 
-    const handleSubmit = useCallback(async () => {
+    const handleListen = useCallback(
+        (transcript) => {
+            setText(transcript);
+            if (autoRecording && transcript.trim() !== "") {
+                handleSubmit();
+            }
+        },
+        [autoRecording]
+    );
+
+    const toggleListening = () => {
+        setIsListening((prevState) => !prevState);
+    };
+
+    const handleLanguageChange = (event) => {
+        setLanguage(event.target.value);
+    };
+
+    const handleSubmit = async () => {
         if (text.trim() === "") return;
         stop();
         const aiReply = await sendMessage(text, language);
@@ -84,24 +104,6 @@ const App = () => {
                 { role: "assistant", content: aiReply },
             ]);
         }
-    }, [text, language, sendMessage, stop, speak, autoRecording, currentSession, conversationHistory, createNewSession, setActiveSession, updateSession]);
-
-    const handleListen = useCallback(
-        (transcript) => {
-            setText(transcript);
-            if (autoRecording && transcript.trim() !== "") {
-                handleSubmit();
-            }
-        },
-        [autoRecording, handleSubmit]
-    );
-
-    const toggleListening = () => {
-        setIsListening((prevState) => !prevState);
-    };
-
-    const handleLanguageChange = (event) => {
-        setLanguage(event.target.value);
     };
 
     const toggleTheme = () => {
