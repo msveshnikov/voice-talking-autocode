@@ -2,15 +2,15 @@
 
 ## Overview
 
-A React-based application that utilizes speech recognition for Speech-to-Text (STT) and Text-to-Speech (TTS) functionality, integrated with the Claude 3 Haiku AI model.
+A React-based application that utilizes speech recognition for Speech-to-Text (STT) and Text-to-Speech (TTS) functionality, integrated with the Gemini Flash 1.5 model.
 
 ## Features
 
 -   Simple React App with Material-UI v5
 -   Speech recognition for STT and TTS
--   Integration with Claude 3 Haiku AI model
+-   Integration with Gemini 3 Haiku AI model
 -   Support for English and Russian languages
--   Environment variable-based configuration (REACT_APP_CLAUDE_KEY)
+-   Environment variable-based configuration (REACT_APP_GEMINI_KEY)
 -   Responsive design for various device sizes
 -   Automatic and manual recording options
 -   Conversation log display
@@ -62,7 +62,7 @@ voice-talking-app/
 2. Install dependencies: `npm install`
 3. Set up environment variables:
     - Create a `.env` file in the root directory
-    - Add your Claude API key: `REACT_APP_CLAUDE_KEY=your_api_key_here`
+    - Add your Gemini API key: `REACT_APP_GEMINI_KEY=your_api_key_here`
 4. Start the development server: `npm start`
 
 ## Contributing
@@ -75,5 +75,4 @@ This project is licensed under the MIT License.
 
 # TODO
 
--   fix Access to XMLHttpRequest at 'https://api.anthropic.com/v1/messages' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-api.anthropic.com/v1/messages:1    Failed to load resource: net::ERR_FAILED
+-   rewrite to Gemini API

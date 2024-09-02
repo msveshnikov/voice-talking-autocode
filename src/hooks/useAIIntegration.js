@@ -1,7 +1,5 @@
 import { useState, useCallback } from "react";
-import axios from "axios";
-
-const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const useAIIntegration = () => {
     const [aiResponse, setAiResponse] = useState("");
@@ -13,29 +11,14 @@ const useAIIntegration = () => {
         setError(null);
 
         try {
-            const response = await axios.post(
-                CLAUDE_API_URL,
-                {
-                    model: "claude-3-haiku-20240307",
-                    max_tokens: 1000,
-                    messages: [
-                        {
-                            role: "system",
-                            content: `You are a helpful AI assistant. Please respond in ${language}.`,
-                        },
-                        { role: "user", content: message },
-                    ],
-                },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-api-key": process.env.REACT_APP_CLAUDE_KEY,
-                        "Access-Control-Allow-Origin": "*",
-                    },
-                }
-            );
+            const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-            const aiReply = response.data.content[0].text;
+            const prompt = `You are a helpful AI assistant. Please respond in ${language}. ${message}`;
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const aiReply = response.text();
+
             setAiResponse(aiReply);
             return aiReply;
         } catch (err) {
