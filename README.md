@@ -79,21 +79,3 @@ voice-talking-app/
     - Add your Gemini API key: `REACT_APP_GEMINI_KEY=your_api_key_here`
 4. Start the development server: `npm start`
 
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines and code of conduct before submitting pull requests.
-
-## License
-
-This project is licensed under the MIT License.
-
-## TODO
-
--   Add automatic pause detection and provide AI answer immediately, then switch to listening
--   When stop listening, auto-submit and send to model
--   Add time of session to drawer, not just ID
--   Create a settings page for advanced configuration options
--   Fix ERROR onSessionChange is not a function TypeError: onSessionChange is not a function
--   Rework design make it adhere to UX principles
--   Please send SUBMIT when you got chunk of sound from recognition, don't wait
--   Russian regocnition doesnt work!!

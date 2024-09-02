@@ -97,23 +97,6 @@ const ConversationLog = ({ conversation, currentSession, onSessionChange }) => {
                     ))}
                 </List>
             </Collapse>
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Saved Sessions
-            </Typography>
-            <List>
-                {savedSessions.map((session) => (
-                    <ListItem key={session.id}>
-                        <ListItemText
-                            primary={`Session ${session.id}`}
-                            secondary={new Date(session.timestamp).toLocaleString()}
-                        />
-                        <Button onClick={() => onSessionChange(session.id)}>Load</Button>
-                        <IconButton onClick={() => handleDeleteSession(session.id)} size="small">
-                            <DeleteIcon />
-                        </IconButton>
-                    </ListItem>
-                ))}
-            </List>
         </Paper>
     );
 };
