@@ -15,45 +15,55 @@ import SaveIcon from "@mui/icons-material/Save";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DeleteIcon from "@mui/icons-material/Delete";
-import useSessionManager from "../utils/sessionManager";
 
 const ConversationLog = ({ conversation, currentSession, onSessionChange }) => {
     const [expanded, setExpanded] = useState(true);
-    const { getAllSessions, updateSession, deleteSession, createNewSession, setActiveSession } = useSessionManager();
+    const [savedSessions, setSavedSessions] = useState([]);
+
+    useEffect(() => {
+        const savedConversations = JSON.parse(localStorage.getItem("conversationSessions")) || [];
+        setSavedSessions(savedConversations);
+    }, []);
+
+    const saveConversationToLocalStorage = useCallback(
+        (sessionId, conversationData) => {
+            const updatedSessions = savedSessions.filter((session) => session.id !== sessionId);
+            const newSession = {
+                id: sessionId,
+                conversation: conversationData,
+                timestamp: new Date().toISOString(),
+            };
+            updatedSessions.push(newSession);
+            localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+            setSavedSessions(updatedSessions);
+        },
+        [savedSessions]
+    );
 
     useEffect(() => {
         if (conversation.length > 0 && currentSession) {
-            updateSession(currentSession, conversation);
+            saveConversationToLocalStorage(currentSession, conversation);
         }
-    }, [conversation, currentSession, updateSession]);
+    }, [conversation, currentSession, saveConversationToLocalStorage]);
 
-    const handleSaveConversation = useCallback(() => {
-        const newSessionId = createNewSession();
-        updateSession(newSessionId, conversation);
+    const handleSaveConversation = () => {
+        const newSessionId = Date.now().toString();
+        saveConversationToLocalStorage(newSessionId, conversation);
         onSessionChange(newSessionId);
-    }, [conversation, createNewSession, updateSession, onSessionChange]);
+    };
 
-    const handleDeleteSession = useCallback(
-        (sessionId) => {
-            deleteSession(sessionId);
-            if (sessionId === currentSession) {
-                onSessionChange(null);
-            }
-        },
-        [deleteSession, currentSession, onSessionChange]
-    );
+    const handleDeleteSession = (sessionId) => {
+        const updatedSessions = savedSessions.filter((session) => session.id !== sessionId);
+        localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+        setSavedSessions(updatedSessions);
+        if (sessionId === currentSession) {
+            onSessionChange(null);
+        }
+    };
 
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
-
-    const handleLoadSession = useCallback(
-        (sessionId) => {
-            setActiveSession(sessionId);
-            onSessionChange(sessionId);
-        },
-        [setActiveSession, onSessionChange]
-    );
 
     return (
         <Paper elevation={3} sx={{ p: 2, mb: 2, maxHeight: 400, overflow: "auto" }}>
@@ -91,13 +101,13 @@ const ConversationLog = ({ conversation, currentSession, onSessionChange }) => {
                 Saved Sessions
             </Typography>
             <List>
-                {getAllSessions().map((session) => (
+                {savedSessions.map((session) => (
                     <ListItem key={session.id}>
                         <ListItemText
                             primary={`Session ${session.id}`}
                             secondary={new Date(session.timestamp).toLocaleString()}
                         />
-                        <Button onClick={() => handleLoadSession(session.id)}>Load</Button>
+                        <Button onClick={() => onSessionChange(session.id)}>Load</Button>
                         <IconButton onClick={() => handleDeleteSession(session.id)} size="small">
                             <DeleteIcon />
                         </IconButton>

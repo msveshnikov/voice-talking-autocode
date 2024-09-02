@@ -1,103 +1,90 @@
 import { useState, useCallback, useEffect } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import useSessionManager from "../utils/sessionManager";
 
 const useAIIntegration = () => {
-    const [aiResponse, setAiResponse] = useState("");
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [conversationHistory, setConversationHistory] = useState([]);
-    const {
-        createNewSession,
-        updateSession,
-        deleteSession,
-        getSession,
-        getAllSessions,
-        setActiveSession,
-        currentSession,
-    } = useSessionManager();
+  const [aiResponse, setAiResponse] = useState("");
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [sessions, setSessions] = useState([]);
 
-    useEffect(() => {
-        if (currentSession) {
-            const session = getSession(currentSession);
-            if (session) {
-                setConversationHistory(session.conversation);
-            }
-        }
-    }, [currentSession, getSession]);
+  useEffect(() => {
+    const savedSessions = localStorage.getItem("conversationSessions");
+    if (savedSessions) {
+      setSessions(JSON.parse(savedSessions));
+    }
+  }, []);
 
-    const sendMessage = useCallback(
-        async (message, language) => {
-            setIsLoading(true);
-            setError(null);
+  const saveSessionToLocalStorage = useCallback((sessionData) => {
+    const updatedSessions = [...sessions, sessionData];
+    localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+    setSessions(updatedSessions);
+  }, [sessions]);
 
-            try {
-                const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_KEY);
-                const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const sendMessage = useCallback(async (message, language) => {
+    setIsLoading(true);
+    setError(null);
 
-                const prompt = `You are a helpful AI assistant. Please respond in ${language}. Context: ${conversationHistory
-                    .map((msg) => `${msg.role}: ${msg.content}`)
-                    .join("\n")}\n\nUser: ${message}\nAssistant:`;
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                const aiReply = response.text();
+    try {
+      const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-                setAiResponse(aiReply);
-                const updatedConversation = [
-                    ...conversationHistory,
-                    { role: "user", content: message },
-                    { role: "assistant", content: aiReply },
-                ];
-                setConversationHistory(updatedConversation);
+      const prompt = `You are a helpful AI assistant. Please respond in ${language}. Context: ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join("\n")}\n\nUser: ${message}\nAssistant:`;
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const aiReply = response.text();
 
-                if (!currentSession) {
-                    const newSessionId = createNewSession();
-                    setActiveSession(newSessionId);
-                }
-                updateSession(currentSession, updatedConversation);
+      setAiResponse(aiReply);
+      const updatedConversation = [
+        ...conversationHistory,
+        { role: "user", content: message },
+        { role: "assistant", content: aiReply },
+      ];
+      setConversationHistory(updatedConversation);
+      saveSessionToLocalStorage({
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        conversation: updatedConversation,
+      });
+      return aiReply;
+    } catch (err) {
+      setError(`Error communicating with AI: ${err.message}`);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [conversationHistory, saveSessionToLocalStorage]);
 
-                return aiReply;
-            } catch (err) {
-                setError(`Error communicating with AI: ${err.message}`);
-                return null;
-            } finally {
-                setIsLoading(false);
-            }
-        },
-        [conversationHistory, currentSession, createNewSession, setActiveSession, updateSession]
-    );
+  const clearConversationHistory = useCallback(() => {
+    setConversationHistory([]);
+    localStorage.removeItem("conversationSessions");
+    setSessions([]);
+  }, []);
 
-    const clearConversationHistory = useCallback(() => {
-        setConversationHistory([]);
-        if (currentSession) {
-            deleteSession(currentSession);
-            setActiveSession(null);
-        }
-    }, [currentSession, deleteSession, setActiveSession]);
+  const loadSession = useCallback((sessionId) => {
+    const session = sessions.find((s) => s.id === sessionId);
+    if (session) {
+      setConversationHistory(session.conversation);
+    }
+  }, [sessions]);
 
-    const loadSession = useCallback(
-        (sessionId) => {
-            const session = getSession(sessionId);
-            if (session) {
-                setConversationHistory(session.conversation);
-                setActiveSession(sessionId);
-            }
-        },
-        [getSession, setActiveSession]
-    );
+  const deleteSession = useCallback((sessionId) => {
+    const updatedSessions = sessions.filter((s) => s.id !== sessionId);
+    localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+    setSessions(updatedSessions);
+  }, [sessions]);
 
-    return {
-        aiResponse,
-        error,
-        isLoading,
-        sendMessage,
-        conversationHistory,
-        clearConversationHistory,
-        sessions: getAllSessions(),
-        loadSession,
-        deleteSession,
-        currentSession,
-    };
+  return {
+    aiResponse,
+    error,
+    isLoading,
+    sendMessage,
+    conversationHistory,
+    clearConversationHistory,
+    sessions,
+    loadSession,
+    deleteSession,
+  };
 };
 
 export default useAIIntegration;

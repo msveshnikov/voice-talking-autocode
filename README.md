@@ -62,7 +62,12 @@ voice-talking-app/
 -   Optimize AI model integration for faster response times
 -   Add support for additional languages
 -   Integrate with cloud services for data persistence and sync across devices
+-   Implement accessibility features (e.g., screen reader support, keyboard navigation)
 -   Implement automatic pause detection for seamless conversation flow
+-   Add session management with timestamps in the sidebar
+-   Implement chat history context for improved AI responses
+-   Enhance dark theme to cover the entire application interface
+-   Add voice command support for hands-free operation
 -   Implement real-time transcription display during speech input
 
 ## Getting Started
@@ -74,10 +79,21 @@ voice-talking-app/
     - Add your Gemini API key: `REACT_APP_GEMINI_KEY=your_api_key_here`
 4. Start the development server: `npm start`
 
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines and code of conduct before submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License.
+
 ## TODO
 
--   Auto Recording switch doesn;t work, it is not submitting my question
--   Please send SUBMIT when you got chunk of sound from recognition, don't wait
--   When user stops speaking, auto-submit and send to model
+-   Add automatic pause detection and provide AI answer immediately, then switch to listening
+-   When stop listening, auto-submit and send to model
+-   Add time of session to drawer, not just ID
+-   Create a settings page for advanced configuration options
+-   Fix ERROR onSessionChange is not a function TypeError: onSessionChange is not a function
 -   Rework design make it adhere to UX principles
+-   Please send SUBMIT when you got chunk of sound from recognition, don't wait
 -   Russian regocnition doesnt work!!
