@@ -102,7 +102,7 @@ const App = () => {
                     "x-api-key": process.env.REACT_APP_CLAUDE_KEY,
                 },
                 body: JSON.stringify({
-                    model: "claude-2",
+                    model: "claude-3-haiku-20240307",
                     messages: [{ role: "user", content: text }],
                 }),
             });

@@ -35,6 +35,5 @@ voice-talking-app/
 -   Optimize AI model integration for improved performance
 -   Print log of conversation
 -   Start stop recording button but mostly automatic
--   Call Antropic AI with REACT_APP_CLAUDE_KEY and speak loud answer
-
-
+-   Call Antropic AI with REACT_APP_CLAUDE_KEY and speak loud answer, model "claude-3-haiku-20240307": ["image", "document", "tools"],
+-   Make design nice and cool
