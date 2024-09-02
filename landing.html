@@ -80,23 +80,6 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-        .pricing {
-            display: flex;
-            justify-content: space-around;
-            margin: 50px 0;
-        }
-        .plan {
-            flex-basis: calc(33.333% - 20px);
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .plan:hover {
-            transform: scale(1.05);
-        }
         .cta {
             text-align: center;
             margin: 50px 0;
@@ -149,7 +132,7 @@
             }
         }
         @media (max-width: 768px) {
-            .feature, .plan {
+            .feature {
                 flex-basis: 100%;
             }
         }
@@ -194,45 +177,6 @@
                 <div class="feature">
                     <h3>Conversation Log</h3>
                     <p>Keep track of your interactions with a detailed conversation history.</p>
-                </div>
-            </div>
-        </section>
-        <section class="pricing">
-            <div class="container">
-                <div class="plan">
-                    <h3>Basic</h3>
-                    <p>Perfect for casual users</p>
-                    <h4>$9.99/month</h4>
-                    <ul>
-                        <li>100 minutes of voice interaction</li>
-                        <li>Basic AI responses</li>
-                        <li>English language support</li>
-                    </ul>
-                    <a href="#" class="button">Choose Plan</a>
-                </div>
-                <div class="plan">
-                    <h3>Pro</h3>
-                    <p>Ideal for regular users</p>
-                    <h4>$19.99/month</h4>
-                    <ul>
-                        <li>Unlimited voice interaction</li>
-                        <li>Advanced AI responses</li>
-                        <li>Multi-language support</li>
-                        <li>Priority customer support</li>
-                    </ul>
-                    <a href="#" class="button">Choose Plan</a>
-                </div>
-                <div class="plan">
-                    <h3>Enterprise</h3>
-                    <p>For businesses and power users</p>
-                    <h4>Contact Us</h4>
-                    <ul>
-                        <li>Custom AI model integration</li>
-                        <li>Advanced analytics</li>
-                        <li>Dedicated account manager</li>
-                        <li>24/7 premium support</li>
-                    </ul>
-                    <a href="#" class="button">Contact Sales</a>
                 </div>
             </div>
         </section>

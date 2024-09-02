@@ -27,6 +27,7 @@ import { useTextToSpeech } from "./components/TextToSpeech";
 import LanguageSelector from "./components/LanguageSelector";
 import ConversationLog from "./components/ConversationLog";
 import useAIIntegration from "./hooks/useAIIntegration";
+import useSessionManager from "./utils/sessionManager";
 import { lightTheme, darkTheme } from "./styles/theme";
 
 const App = () => {
@@ -36,7 +37,6 @@ const App = () => {
     const [language, setLanguage] = useState("en-US");
     const [autoRecording, setAutoRecording] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [currentSession, setCurrentSession] = useState(null);
 
     const theme = useMemo(() => createTheme(mode === "light" ? lightTheme : darkTheme), [mode]);
 
@@ -49,7 +49,11 @@ const App = () => {
         clearConversationHistory,
         sessions,
         loadSession,
+        deleteSession,
     } = useAIIntegration();
+
+    const { createNewSession, updateSession, getSession, getAllSessions, setActiveSession, currentSession } =
+        useSessionManager();
 
     const { speak, stop } = useTextToSpeech();
 
@@ -60,7 +64,6 @@ const App = () => {
                 handleSubmit();
             }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [autoRecording]
     );
 
@@ -85,6 +88,22 @@ const App = () => {
         if (autoRecording) {
             setIsListening(true);
         }
+
+        if (currentSession) {
+            updateSession(currentSession, [
+                ...conversationHistory,
+                { role: "user", content: text },
+                { role: "assistant", content: aiReply },
+            ]);
+        } else {
+            const newSessionId = createNewSession();
+            setActiveSession(newSessionId);
+            updateSession(newSessionId, [
+                ...conversationHistory,
+                { role: "user", content: text },
+                { role: "assistant", content: aiReply },
+            ]);
+        }
     };
 
     const toggleTheme = () => {
@@ -100,7 +119,7 @@ const App = () => {
 
     const selectSession = (sessionId) => {
         loadSession(sessionId);
-        setCurrentSession(sessionId);
+        setActiveSession(sessionId);
     };
 
     useEffect(() => {
@@ -183,7 +202,11 @@ const App = () => {
                             </Typography>
                             <Typography>{aiResponse}</Typography>
                         </Paper>
-                        <ConversationLog conversation={conversationHistory} currentSession={currentSession} />
+                        <ConversationLog
+                            conversation={conversationHistory}
+                            currentSession={currentSession}
+                            onSessionChange={selectSession}
+                        />
                     </Box>
                 </Container>
                 <SpeechRecognition
@@ -191,6 +214,7 @@ const App = () => {
                     language={language}
                     onTranscript={handleListen}
                     onError={(error) => console.error(error)}
+                    autoRecording={autoRecording}
                 />
                 <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
                     <Box
@@ -203,9 +227,12 @@ const App = () => {
                             <ListItem>
                                 <ListItemText primary="Conversation Sessions" />
                             </ListItem>
-                            {sessions.map((session) => (
+                            {getAllSessions().map((session) => (
                                 <ListItem key={session.id} button onClick={() => selectSession(session.id)}>
-                                    <ListItemText primary={`Session ${session.id}`} />
+                                    <ListItemText
+                                        primary={`Session ${session.id}`}
+                                        secondary={new Date(session.timestamp).toLocaleString()}
+                                    />
                                 </ListItem>
                             ))}
                         </List>
