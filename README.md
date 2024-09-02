@@ -26,7 +26,7 @@ voice-talking-app/
 └── package.json
 ```
 
-## Design Considerations
+# TODO
 
 -   Implement a responsive design for various device sizes
 -   Create reusable components for speech recognition and TTS
@@ -35,10 +35,6 @@ voice-talking-app/
 -   Optimize AI model integration for improved performance
 -   Print log of conversation
 -   Start stop recording button but mostly automatic
+-   Call Antropic AI with REACT_APP_CLAUDE_KEY and speak loud answer
 
-## Future Enhancements
-
--   Add support for additional languages
--   Implement user authentication and personalized experiences
--   Integrate with cloud services for scalability
 
