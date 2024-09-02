@@ -34,10 +34,12 @@ const App = () => {
     const [language, setLanguage] = useState("en-US");
     const [autoRecording, setAutoRecording] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [sessions, setSessions] = useState([]);
+    const [currentSession, setCurrentSession] = useState(null);
 
     const theme = useMemo(() => createTheme(mode === "light" ? lightTheme : darkTheme), [mode]);
 
-    const { aiResponse, error, sendMessage } = useAIIntegration();
+    const { aiResponse, error, isLoading, sendMessage } = useAIIntegration();
 
     const handleListen = useCallback(
         (transcript) => {
@@ -61,13 +63,16 @@ const App = () => {
     const handleSubmit = async () => {
         if (text.trim() === "") return;
 
-        setConversation((prev) => [...prev, { role: "user", content: text }]);
-        const aiReply = await sendMessage(text);
+        const updatedConversation = [...conversation, { role: "user", content: text }];
+        setConversation(updatedConversation);
+        const aiReply = await sendMessage(text, language);
         setText("");
 
         if (aiReply) {
-            setConversation((prev) => [...prev, { role: "assistant", content: aiReply }]);
+            const finalConversation = [...updatedConversation, { role: "assistant", content: aiReply }];
+            setConversation(finalConversation);
             TextToSpeech.speak(aiReply, language);
+            saveConversationToLocalStorage(finalConversation);
         }
     };
 
@@ -81,6 +86,36 @@ const App = () => {
         }
         setDrawerOpen(open);
     };
+
+    const saveConversationToLocalStorage = (conversationData) => {
+        const sessionId = currentSession || Date.now().toString();
+        const updatedSessions = [
+            ...sessions.filter((s) => s.id !== sessionId),
+            { id: sessionId, conversation: conversationData },
+        ];
+        localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+        setSessions(updatedSessions);
+        setCurrentSession(sessionId);
+    };
+
+    const loadSessionsFromLocalStorage = () => {
+        const savedSessions = localStorage.getItem("conversationSessions");
+        if (savedSessions) {
+            setSessions(JSON.parse(savedSessions));
+        }
+    };
+
+    const selectSession = (sessionId) => {
+        const session = sessions.find((s) => s.id === sessionId);
+        if (session) {
+            setConversation(session.conversation);
+            setCurrentSession(sessionId);
+        }
+    };
+
+    useEffect(() => {
+        loadSessionsFromLocalStorage();
+    }, []);
 
     useEffect(() => {
         if (autoRecording && !isListening) {
@@ -139,8 +174,8 @@ const App = () => {
                         onChange={(e) => setText(e.target.value)}
                         sx={{ mb: 2 }}
                     />
-                    <Button variant="contained" onClick={handleSubmit} sx={{ mb: 2 }}>
-                        Submit
+                    <Button variant="contained" onClick={handleSubmit} sx={{ mb: 2 }} disabled={isLoading}>
+                        {isLoading ? "Processing..." : "Submit"}
                     </Button>
                     {error && (
                         <Typography color="error" sx={{ mb: 2 }}>
@@ -171,11 +206,11 @@ const App = () => {
                 >
                     <List>
                         <ListItem>
-                            <ListItemText primary="Conversation History" />
+                            <ListItemText primary="Conversation Sessions" />
                         </ListItem>
-                        {conversation.map((entry, index) => (
-                            <ListItem key={index}>
-                                <ListItemText primary={`${entry.role === "user" ? "You" : "AI"}: ${entry.content}`} />
+                        {sessions.map((session) => (
+                            <ListItem key={session.id} button onClick={() => selectSession(session.id)}>
+                                <ListItemText primary={`Session ${session.id}`} />
                             </ListItem>
                         ))}
                     </List>

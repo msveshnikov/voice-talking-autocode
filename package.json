@@ -1,14 +1,12 @@
 {
     "name": "voice-talking-app",
     "version": "0.1.0",
-    "private": true,
     "dependencies": {
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@google/generative-ai": "^0.17.1",
         "@mui/icons-material": "^5.14.10",
         "@mui/material": "^5.14.10",
-        "axios": "^1.7.7",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-scripts": "5.0.1",

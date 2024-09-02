@@ -75,4 +75,7 @@ This project is licensed under the MIT License.
 
 # TODO
 
--   rewrite to Gemini API
+-   save conversation logs to localstorage (each session in separate in drawer)
+-   add automatic pause detection and provide AI answer immediately, then switch to listening
+-   when stop listening, auot submit and send tp model
+-   make dark theme apply to all application noot only chat log
