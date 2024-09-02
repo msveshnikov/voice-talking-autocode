@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
     Container,
     Typography,
@@ -13,14 +13,17 @@ import {
     ListItem,
     ListItemText,
     Paper,
+    Fab,
+    Tooltip,
 } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import MicIcon from "@mui/icons-material/Mic";
 import HistoryIcon from "@mui/icons-material/History";
+import SendIcon from "@mui/icons-material/Send";
 import SpeechRecognition from "./components/SpeechRecognition";
-import TextToSpeech from "./components/TextToSpeech";
+import { useTextToSpeech } from "./components/TextToSpeech";
 import LanguageSelector from "./components/LanguageSelector";
 import ConversationLog from "./components/ConversationLog";
 import useAIIntegration from "./hooks/useAIIntegration";
@@ -30,16 +33,25 @@ const App = () => {
     const [mode, setMode] = useState("light");
     const [isListening, setIsListening] = useState(false);
     const [text, setText] = useState("");
-    const [conversation, setConversation] = useState([]);
     const [language, setLanguage] = useState("en-US");
     const [autoRecording, setAutoRecording] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [sessions, setSessions] = useState([]);
     const [currentSession, setCurrentSession] = useState(null);
 
     const theme = useMemo(() => createTheme(mode === "light" ? lightTheme : darkTheme), [mode]);
 
-    const { aiResponse, error, isLoading, sendMessage } = useAIIntegration();
+    const {
+        aiResponse,
+        error,
+        isLoading,
+        sendMessage,
+        conversationHistory,
+        clearConversationHistory,
+        sessions,
+        loadSession,
+    } = useAIIntegration();
+
+    const { speak, stop } = useTextToSpeech();
 
     const handleListen = useCallback(
         (transcript) => {
@@ -62,17 +74,12 @@ const App = () => {
 
     const handleSubmit = async () => {
         if (text.trim() === "") return;
-
-        const updatedConversation = [...conversation, { role: "user", content: text }];
-        setConversation(updatedConversation);
+        stop();
         const aiReply = await sendMessage(text, language);
         setText("");
 
         if (aiReply) {
-            const finalConversation = [...updatedConversation, { role: "assistant", content: aiReply }];
-            setConversation(finalConversation);
-            TextToSpeech.speak(aiReply, language);
-            saveConversationToLocalStorage(finalConversation);
+            speak(aiReply, language);
         }
 
         if (autoRecording) {
@@ -91,35 +98,10 @@ const App = () => {
         setDrawerOpen(open);
     };
 
-    const saveConversationToLocalStorage = (conversationData) => {
-        const sessionId = currentSession || Date.now().toString();
-        const updatedSessions = [
-            ...sessions.filter((s) => s.id !== sessionId),
-            { id: sessionId, conversation: conversationData },
-        ];
-        localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
-        setSessions(updatedSessions);
+    const selectSession = (sessionId) => {
+        loadSession(sessionId);
         setCurrentSession(sessionId);
     };
-
-    const loadSessionsFromLocalStorage = () => {
-        const savedSessions = localStorage.getItem("conversationSessions");
-        if (savedSessions) {
-            setSessions(JSON.parse(savedSessions));
-        }
-    };
-
-    const selectSession = (sessionId) => {
-        const session = sessions.find((s) => s.id === sessionId);
-        if (session) {
-            setConversation(session.conversation);
-            setCurrentSession(sessionId);
-        }
-    };
-
-    useEffect(() => {
-        loadSessionsFromLocalStorage();
-    }, []);
 
     useEffect(() => {
         if (autoRecording && !isListening) {
@@ -131,7 +113,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <Box sx={{ bgcolor: "background.default", minHeight: "100vh", color: "text.primary" }}>
                 <Container maxWidth="md">
-                    <Box sx={{ my: 4 }}>
+                    <Box>
                         <Grid container justifyContent="space-between" alignItems="center">
                             <Grid item>
                                 <Typography variant="h4" component="h1" gutterBottom>
@@ -152,15 +134,17 @@ const App = () => {
                                 <LanguageSelector language={language} onChange={handleLanguageChange} />
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <Button
-                                    variant="contained"
-                                    color={isListening ? "secondary" : "primary"}
-                                    onClick={toggleListening}
-                                    startIcon={<MicIcon />}
-                                    fullWidth
-                                >
-                                    {isListening ? "Stop" : "Start"} Listening
-                                </Button>
+                                <Tooltip title={isListening ? "Stop Listening" : "Start Listening"}>
+                                    <Button
+                                        variant="contained"
+                                        color={isListening ? "secondary" : "primary"}
+                                        onClick={toggleListening}
+                                        startIcon={<MicIcon />}
+                                        fullWidth
+                                    >
+                                        {isListening ? "Stop" : "Start"} Listening
+                                    </Button>
+                                </Tooltip>
                             </Grid>
                         </Grid>
                         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -179,7 +163,13 @@ const App = () => {
                             onChange={(e) => setText(e.target.value)}
                             sx={{ mb: 2 }}
                         />
-                        <Button variant="contained" onClick={handleSubmit} sx={{ mb: 2 }} disabled={isLoading}>
+                        <Button
+                            variant="contained"
+                            onClick={handleSubmit}
+                            sx={{ mb: 2 }}
+                            disabled={isLoading}
+                            startIcon={<SendIcon />}
+                        >
                             {isLoading ? "Processing..." : "Submit"}
                         </Button>
                         {error && (
@@ -193,7 +183,7 @@ const App = () => {
                             </Typography>
                             <Typography>{aiResponse}</Typography>
                         </Paper>
-                        <ConversationLog conversation={conversation} />
+                        <ConversationLog conversation={conversationHistory} currentSession={currentSession} />
                     </Box>
                 </Container>
                 <SpeechRecognition
@@ -221,6 +211,16 @@ const App = () => {
                         </List>
                     </Box>
                 </Drawer>
+                <Tooltip title="Clear Conversation">
+                    <Fab
+                        color="secondary"
+                        aria-label="clear"
+                        onClick={clearConversationHistory}
+                        sx={{ position: "fixed", bottom: 16, right: 16 }}
+                    >
+                        <HistoryIcon />
+                    </Fab>
+                </Tooltip>
             </Box>
         </ThemeProvider>
     );

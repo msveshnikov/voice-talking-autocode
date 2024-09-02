@@ -1,6 +1,7 @@
 {
     "name": "voice-talking-app",
     "version": "0.1.0",
+    "private": true,
     "dependencies": {
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
@@ -15,7 +16,9 @@
     },
     "scripts": {
         "start": "react-scripts start",
-        "build": "react-scripts build"
+        "build": "react-scripts build",
+        "lint": "eslint src/**/*.{js,jsx}",
+        "format": "prettier --write src/**/*.{js,jsx,json,css,md}"
     },
     "eslintConfig": {
         "extends": [
@@ -37,6 +40,8 @@
     },
     "devDependencies": {
         "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-        "eslint": "^8.49.0"
+        "eslint": "^8.49.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-react": "^7.32.2"
     }
 }

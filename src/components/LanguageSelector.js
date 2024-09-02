@@ -1,24 +1,34 @@
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, Box, Typography } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 
 const LanguageSelector = ({ language, onChange }) => {
-    return (
-        <FormControl fullWidth>
-            <InputLabel id="language-select-label">Language</InputLabel>
-            <Select
-                labelId="language-select-label"
-                id="language-select"
-                value={language}
-                label="Language"
-                onChange={onChange}
-                startAdornment={<LanguageIcon sx={{ mr: 1 }} />}
-            >
-                <MenuItem value="en-US">English</MenuItem>
-                <MenuItem value="ru-RU">Russian</MenuItem>
-            </Select>
-        </FormControl>
-    );
+  const languages = [
+    { code: "en-US", name: "English" },
+    { code: "ru-RU", name: "Russian" },
+  ];
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      <LanguageIcon sx={{ mr: 1 }} />
+      <FormControl fullWidth size="small">
+        <InputLabel id="language-select-label">Language</InputLabel>
+        <Select
+          labelId="language-select-label"
+          id="language-select"
+          value={language}
+          label="Language"
+          onChange={onChange}
+        >
+          {languages.map((lang) => (
+            <MenuItem key={lang.code} value={lang.code}>
+              <Typography>{lang.name}</Typography>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
 };
 
 export default LanguageSelector;

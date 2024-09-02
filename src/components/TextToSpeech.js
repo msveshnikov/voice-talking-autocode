@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 const TextToSpeech = {
   speak: (text, language) => {
@@ -19,18 +19,34 @@ export const useTextToSpeech = () => {
     };
   }, []);
 
-  const speak = (text, language) => {
+  const speak = useCallback((text, language) => {
     synth.current.cancel();
     utterance.current.text = text;
     utterance.current.lang = language;
     synth.current.speak(utterance.current);
-  };
+  }, []);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     synth.current.cancel();
-  };
+  }, []);
 
-  return { speak, stop };
+  const pause = useCallback(() => {
+    synth.current.pause();
+  }, []);
+
+  const resume = useCallback(() => {
+    synth.current.resume();
+  }, []);
+
+  const getVoices = useCallback(() => {
+    return synth.current.getVoices();
+  }, []);
+
+  const setVoice = useCallback((voice) => {
+    utterance.current.voice = voice;
+  }, []);
+
+  return { speak, stop, pause, resume, getVoices, setVoice };
 };
 
 export default TextToSpeech;

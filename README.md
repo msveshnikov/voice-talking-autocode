@@ -1,4 +1,4 @@
-# Voice Talking App with AI (build by [AutoCode](https://autocode.work) in 20 minutes)
+# Voice Talking App with AI (built by [AutoCode](https://autocode.work) in 20 minutes)
 
 ## Overview
 
@@ -15,6 +15,9 @@ A React-based application that utilizes speech recognition for Speech-to-Text (S
 -   Automatic and manual recording options
 -   Conversation log display
 -   User-friendly language selection interface
+-   Dark/light mode toggle
+-   Voice visualization for active speech input
+-   Collapsible sidebar for conversation history and settings
 
 ## Project Structure
 
@@ -29,11 +32,16 @@ voice-talking-app/
 │   │   ├── SpeechRecognition.js
 │   │   ├── TextToSpeech.js
 │   │   ├── LanguageSelector.js
-│   │   └── ConversationLog.js
+│   │   ├── ConversationLog.js
+│   │   ├── DarkModeToggle.js
+│   │   └── VoiceVisualization.js
 │   ├── hooks/
-│   │   └── useAIIntegration.js
+│   │   ├── useAIIntegration.js
+│   │   └── useLocalStorage.js
 │   ├── styles/
 │   │   └── theme.js
+│   ├── utils/
+│   │   └── sessionManager.js
 │   ├── App.js
 │   └── index.js
 └── package.json
@@ -41,13 +49,13 @@ voice-talking-app/
 
 ## Design Considerations
 
--   Implement a dark/light mode toggle for improved user experience
--   Use a minimalist, clean interface with subtle animations
--   Incorporate voice visualization for active speech input
--   Design an intuitive UI for switching between automatic and manual recording modes
--   Implement a collapsible sidebar for conversation history and settings
+-   Implement a minimalist, clean interface with subtle animations
 -   Use Material-UI's responsive grid system for layout consistency across devices
 -   Create custom icons for various app functions (e.g., microphone, language selection)
+-   Implement a floating action button (FAB) for quick access to main functions
+-   Design an intuitive UI for switching between automatic and manual recording modes
+-   Implement a progress indicator for AI response generation
+-   Add a tooltip system for explaining various features and controls
 
 ## Planned Improvements
 
@@ -55,6 +63,12 @@ voice-talking-app/
 -   Add support for additional languages
 -   Integrate with cloud services for data persistence and sync across devices
 -   Implement accessibility features (e.g., screen reader support, keyboard navigation)
+-   Implement automatic pause detection for seamless conversation flow
+-   Add session management with timestamps in the sidebar
+-   Implement chat history context for improved AI responses
+-   Enhance dark theme to cover the entire application interface
+-   Add voice command support for hands-free operation
+-   Implement real-time transcription display during speech input
 
 ## Getting Started
 
@@ -73,11 +87,13 @@ Contributions are welcome! Please read our contributing guidelines and code of c
 
 This project is licensed under the MIT License.
 
-# TODO
+## TODO
 
--   save conversation logs to localstorage (each session in separate in drawer)
--   add automatic pause detection and provide AI answer immediately, then switch to listening
--   when stop listening, auot submit and send tp model
--   make dark theme apply to full screen of app (I see some white parts around still)
--   send chat history (this session only) to model so it has context of our conversation
--   add time of session to drawer, not just id
+-   Add automatic pause detection and provide AI answer immediately, then switch to listening
+-   When stop listening, auto-submit and send to model
+-   Add time of session to drawer, not just ID
+-   Create a settings page for advanced configuration options
+-   Fix ERROR onSessionChange is not a function TypeError: onSessionChange is not a function
+-   Rework design make it adhere to UX principles
+-   Please send SUBMIT when you got chunk of sound from recognition, don't wait
+-   Russian regocnition doesnt work!!

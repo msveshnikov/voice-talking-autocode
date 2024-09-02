@@ -29,7 +29,7 @@ const useAIIntegration = () => {
       const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-      const prompt = `You are a helpful AI assistant. Please respond in ${language}. ${message}`;
+      const prompt = `You are a helpful AI assistant. Please respond in ${language}. Context: ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join("\n")}\n\nUser: ${message}\nAssistant:`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const aiReply = response.text();
@@ -43,6 +43,7 @@ const useAIIntegration = () => {
       setConversationHistory(updatedConversation);
       saveSessionToLocalStorage({
         id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
         conversation: updatedConversation,
       });
       return aiReply;
@@ -67,6 +68,12 @@ const useAIIntegration = () => {
     }
   }, [sessions]);
 
+  const deleteSession = useCallback((sessionId) => {
+    const updatedSessions = sessions.filter((s) => s.id !== sessionId);
+    localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
+    setSessions(updatedSessions);
+  }, [sessions]);
+
   return {
     aiResponse,
     error,
@@ -76,6 +83,7 @@ const useAIIntegration = () => {
     clearConversationHistory,
     sessions,
     loadSession,
+    deleteSession,
   };
 };
 

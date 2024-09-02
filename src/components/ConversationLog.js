@@ -1,10 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, List, ListItem, ListItemText, Divider, IconButton, Collapse, Box } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+    Paper,
+    Typography,
+    List,
+    ListItem,
+    ListItemText,
+    Divider,
+    IconButton,
+    Collapse,
+    Box,
+    Button,
+} from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const ConversationLog = ({ conversation, currentSession }) => {
+const ConversationLog = ({ conversation, currentSession, onSessionChange }) => {
     const [expanded, setExpanded] = useState(true);
     const [savedSessions, setSavedSessions] = useState([]);
 
@@ -13,20 +25,40 @@ const ConversationLog = ({ conversation, currentSession }) => {
         setSavedSessions(savedConversations);
     }, []);
 
-    useEffect(() => {
-        if (conversation.length > 0 && currentSession) {
-            const updatedSessions = savedSessions.filter((session) => session.id !== currentSession);
-            updatedSessions.push({ id: currentSession, conversation });
+    const saveConversationToLocalStorage = useCallback(
+        (sessionId, conversationData) => {
+            const updatedSessions = savedSessions.filter((session) => session.id !== sessionId);
+            const newSession = {
+                id: sessionId,
+                conversation: conversationData,
+                timestamp: new Date().toISOString(),
+            };
+            updatedSessions.push(newSession);
             localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
             setSavedSessions(updatedSessions);
+        },
+        [savedSessions]
+    );
+
+    useEffect(() => {
+        if (conversation.length > 0 && currentSession) {
+            saveConversationToLocalStorage(currentSession, conversation);
         }
-    }, [conversation, currentSession, savedSessions]);
+    }, [conversation, currentSession, saveConversationToLocalStorage]);
 
     const handleSaveConversation = () => {
-        const newSession = { id: Date.now().toString(), conversation };
-        const updatedSessions = [...savedSessions, newSession];
+        const newSessionId = Date.now().toString();
+        saveConversationToLocalStorage(newSessionId, conversation);
+        onSessionChange(newSessionId);
+    };
+
+    const handleDeleteSession = (sessionId) => {
+        const updatedSessions = savedSessions.filter((session) => session.id !== sessionId);
         localStorage.setItem("conversationSessions", JSON.stringify(updatedSessions));
         setSavedSessions(updatedSessions);
+        if (sessionId === currentSession) {
+            onSessionChange(null);
+        }
     };
 
     const toggleExpanded = () => {
@@ -65,6 +97,23 @@ const ConversationLog = ({ conversation, currentSession }) => {
                     ))}
                 </List>
             </Collapse>
+            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                Saved Sessions
+            </Typography>
+            <List>
+                {savedSessions.map((session) => (
+                    <ListItem key={session.id}>
+                        <ListItemText
+                            primary={`Session ${session.id}`}
+                            secondary={new Date(session.timestamp).toLocaleString()}
+                        />
+                        <Button onClick={() => onSessionChange(session.id)}>Load</Button>
+                        <IconButton onClick={() => handleDeleteSession(session.id)} size="small">
+                            <DeleteIcon />
+                        </IconButton>
+                    </ListItem>
+                ))}
+            </List>
         </Paper>
     );
 };
