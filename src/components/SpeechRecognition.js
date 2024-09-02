@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const SpeechRecognition = ({ isListening, language, onTranscript, onError }) => {
     const recognition = useRef(null);

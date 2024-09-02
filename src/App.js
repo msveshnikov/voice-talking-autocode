@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import {
     Container,
     Typography,
@@ -35,7 +35,7 @@ const App = () => {
     const [autoRecording, setAutoRecording] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
 
-    const theme = React.useMemo(() => createTheme(mode === "light" ? lightTheme : darkTheme), [mode]);
+    const theme = useMemo(() => createTheme(mode === "light" ? lightTheme : darkTheme), [mode]);
 
     const { aiResponse, error, sendMessage } = useAIIntegration();
 
@@ -46,6 +46,7 @@ const App = () => {
                 handleSubmit();
             }
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [autoRecording]
     );
 

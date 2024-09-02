@@ -13,8 +13,9 @@ export const useTextToSpeech = () => {
   const utterance = useRef(new SpeechSynthesisUtterance());
 
   useEffect(() => {
+    const currentSynth = synth.current;
     return () => {
-      synth.current.cancel();
+      currentSynth.cancel();
     };
   }, []);
 
