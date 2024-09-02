@@ -1,4 +1,4 @@
-# Voice Talking App with AI  (build by [AutoCode](https://autocode.work) in 20 minutes)
+# Voice Talking App with AI (build by [AutoCode](https://autocode.work) in 20 minutes)
 
 ## Overview
 
@@ -72,3 +72,8 @@ Contributions are welcome! Please read our contributing guidelines and code of c
 ## License
 
 This project is licensed under the MIT License.
+
+# TODO
+
+-   fix Access to XMLHttpRequest at 'https://api.anthropic.com/v1/messages' from origin 'http://localhost:3000' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.anthropic.com/v1/messages:1    Failed to load resource: net::ERR_FAILED
